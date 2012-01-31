@@ -17,8 +17,8 @@ describe "Users" do
       end
     end
     
-  describe "success" do
-      it "should  make a new user" do
+    describe "success" do
+      it "should make a new user" do
         lambda do
           visit signup_path
           fill_in "Name",         :with =>"Example User"     
@@ -30,6 +30,32 @@ describe "Users" do
                                         :content => "Welcome")
           response.should render_template('users/show')
         end.should change(User, :count).by(1)
+      end  
+    end
+  end
+  
+  describe "signout" do
+    describe "failure" do
+      it "should not log the user in" do
+        visit signin_path
+        fill_in "Email",         :with =>""     
+        fill_in "Password",      :with =>""
+        click_button
+        response.should have_selector('div.flash.error',
+                                      :content => "Invalid")
+        response.should render_template('sessions/new')                                     
+      end    
+    end
+    describe "success" do
+      it "should log the user in and out" do
+        user = Factory(:user)
+        visit signin_path
+        fill_in "Email",         :with =>user.email   
+        fill_in "Password",      :with =>user.password
+        click_button
+        controller.should be_signed_in
+        visit signout_path
+        controller.should_not be_signed_in
       end
     end
   end
